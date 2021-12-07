@@ -37,9 +37,9 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "Mailings list",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/mailsender.ListJson"
                         }
                     },
                     "400": {
@@ -74,7 +74,7 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "id",
                         "schema": {
                             "type": "string"
                         }
@@ -108,9 +108,9 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok",
+                        "description": "mailing",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/model.QueueEntry"
                         }
                     },
                     "400": {
@@ -130,6 +130,31 @@ var doc = `{
         }
     },
     "definitions": {
+        "mailsender.Info": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "mailsender.ListJson": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/mailsender.Info"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.QueueEntry": {
             "type": "object",
             "properties": {

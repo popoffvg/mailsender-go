@@ -96,7 +96,7 @@ func (s *Server) configureRouters() {
 //@Summary Add mailing in queue.
 //@Accept json
 //@Param template body model.QueueEntry true "mailing info"
-//@Success 200 {string} string "ok"
+//@Success 200 {string} string "id"
 //@Success 400 {string} string "Not valid mailing info"
 //@Success 500 {string} string "DB error"
 //@Router /mailing [post]
@@ -142,7 +142,7 @@ type ListJson struct {
 //MailingList godoc
 //@Summary Get mailing list.
 //@Param p query int false "page number, start from 1"
-//@Success 200 {string} string "ok"
+//@Success 200 {object} mailsender.ListJson "Mailings list"
 //@Success 400 {string} string "page error"
 //@Success 500 {string} string "DB error"
 //@Router /mailing [get]
@@ -187,7 +187,7 @@ func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 //MailingGet godoc
 //@Summary Get mailing by id.
 //@Param id path string true "mailing id"
-//@Success 200 {string} string "ok"
+//@Success 200 {object} model.QueueEntry  "mailing"
 //@Success 400 {string} string "Not found mailing with id"
 //@Success 500 {string} string "DB error"
 //@Router /mailing/{mailing_id} [get]
@@ -200,7 +200,7 @@ func (s *Server) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	mail, err := s.queue.Find(r.Context(), model.EntryId(mailId))
-	
+
 	var errNotFound store.ErrNotFound
 	if errors.Is(err, &errNotFound) {
 		http.Error(w, err.Error(), http.StatusBadRequest)

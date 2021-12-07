@@ -1,5 +1,21 @@
 basePath: /
 definitions:
+  mailsender.Info:
+    properties:
+      id:
+        type: string
+      status:
+        type: string
+    type: object
+  mailsender.ListJson:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/mailsender.Info'
+        type: array
+      total:
+        type: integer
+    type: object
   model.QueueEntry:
     properties:
       attempts:
@@ -51,9 +67,9 @@ paths:
         type: integer
       responses:
         "200":
-          description: ok
+          description: Mailings list
           schema:
-            type: string
+            $ref: '#/definitions/mailsender.ListJson'
         "400":
           description: page error
           schema:
@@ -75,7 +91,7 @@ paths:
           $ref: '#/definitions/model.QueueEntry'
       responses:
         "200":
-          description: ok
+          description: id
           schema:
             type: string
         "400":
@@ -97,9 +113,9 @@ paths:
         type: string
       responses:
         "200":
-          description: ok
+          description: mailing
           schema:
-            type: string
+            $ref: '#/definitions/model.QueueEntry'
         "400":
           description: Not found mailing with id
           schema:
