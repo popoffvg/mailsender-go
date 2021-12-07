@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package app
 
 import (
@@ -158,17 +161,17 @@ func Test_List(t *testing.T) {
 
 	time.Sleep(2 * time.Second) // wait sending mail
 
-	data = send(t, http.MethodGet, "mailing", make([]byte,0))
+	data = send(t, http.MethodGet, "mailing", make([]byte, 0))
 
 	list := mailsender.ListJson{
 		Total: 1,
 		Data: []mailsender.Info{
 			{
-				Id: id2,
+				Id:     id2,
 				Status: "Done",
 			},
 			{
-				Id: id1,
+				Id:     id1,
 				Status: "Done",
 			},
 		},
@@ -244,7 +247,7 @@ func Test_Get(t *testing.T) {
 	id := string(data)
 	assert.NotEmpty(t, id)
 
-	data = send(t, http.MethodGet, "mailing/"+id, make([]byte,0))
+	data = send(t, http.MethodGet, "mailing/"+id, make([]byte, 0))
 
 	mailing.Id = model.EntryId(id)
 	mailing.Timestamp = time.Now()
@@ -281,8 +284,8 @@ func prepareContainer(t *testing.T) (*dockertest.Pool, *dockertest.Resource, *mo
 	return pool, resource, db
 }
 
-func send(t *testing.T, method string, path string,  body []byte) []byte {
-	req, err := http.NewRequest(method, "http://localhost:8085/" + path, bytes.NewReader(body))
+func send(t *testing.T, method string, path string, body []byte) []byte {
+	req, err := http.NewRequest(method, "http://localhost:8085/"+path, bytes.NewReader(body))
 	if err != nil {
 		t.Fatal(err)
 	}
