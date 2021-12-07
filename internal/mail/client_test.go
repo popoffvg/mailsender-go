@@ -10,7 +10,7 @@ import (
 	"mts.teta.mailsender/internal/model"
 )
 
-func TestMailing(t *testing.T) {
+func Test_Mailing(t *testing.T) {
 	logger := zap.NewNop().Sugar()
 	cfg := &MailConfig{
 		Host:     "smtp.gmail.com",

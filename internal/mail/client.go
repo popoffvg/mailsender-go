@@ -43,7 +43,7 @@ func ReadConfig() (*MailConfig, error) {
 }
 
 type ErrSending struct {
-	Addrs []string
+	Addrs              []string
 	NotReceivePosition []int
 }
 
@@ -73,7 +73,7 @@ func (c *internalClient) Send(mailing *model.QueueEntry) error {
 		m.SetBody("text/html", mailing.Text)
 		err := smtp.DialAndSend(m)
 		if err != nil {
-			sendingErr.Addrs = append(sendingErr.Addrs, fmt.Sprintf("%s (%s)", receiver, err.Error()))
+			sendingErr.Addrs = append(sendingErr.Addrs, fmt.Sprintf("%s (%s)", receiver.Addr, err.Error()))
 			sendingErr.NotReceivePosition = append(sendingErr.NotReceivePosition, p)
 		}
 	}

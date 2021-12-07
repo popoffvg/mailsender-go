@@ -7,6 +7,7 @@ import (
 	"context"
 	"sync"
 	"testing"
+	"time"
 
 	"go.uber.org/zap"
 	"mts.teta.mailsender/internal/mail"
@@ -22,14 +23,12 @@ func Test_NonBlockingWhileServe(t *testing.T) {
 	sender := New(queue, log, mail.New(nil, log))
 	defer sender.Stop()
 
-	queue.wg.Add(2)
-
 	go sender.Serve()
+	time.Sleep(1 * time.Second)
 	sender.Up()
 	sender.Up()
 
 	logger.Info("Finish")
-	queue.wg.Wait()
 }
 
 type queueMock struct {
@@ -39,7 +38,6 @@ type queueMock struct {
 
 // call from serve
 func (q *queueMock) Get(context.Context) (model.QueueEntry, bool, error) {
-	q.wg.Done()
 	q.logger.Info("Start wait...")
 	return model.QueueEntry{}, false, nil
 }
