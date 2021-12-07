@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  mailsender:
+    build: .
+    container_name: "interview-popov-mailsender"
+    environment:
+      MONGO_HOST: mongo
+      MAIL_EMAIL: "mts.cloud.interview@gmail.com"
+      MAIL_DESCRIPTION: "mail for interview"
+      MAIL_HOST: "smtp.gmail.com"
+      MAIL_PORT: 587
+      MAIL_LOGIN: "mts.cloud.interview"
+      MAIL_PASSWORD: "zsqthfhiqsxlookz" # app pass
+    ports:
+       - "8084:8084"
+    depends_on:
+      - mongo
+    networks:
+    - fullstack
+
+  mongo:
+    image: mongo:5.0.3
+    container_name: "interview-popov-mongo"
+    ports:
+      - "27017:27017"
+    networks:
+      - fullstack
+    logging:
+      driver: none
+
+networks:
+  fullstack:
+    driver: bridge

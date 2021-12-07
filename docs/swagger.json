@@ -1,0 +1,164 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Service send mail to receivers.",
+        "title": "Mailsender",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {},
+        "version": "0.1"
+    },
+    "host": "petstore.swagger.io",
+    "basePath": "/",
+    "paths": {
+        "/mailing": {
+            "get": {
+                "summary": "Get mailing list.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page number, start from 1",
+                        "name": "p",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "page error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "DB error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Add mailing in queue.",
+                "parameters": [
+                    {
+                        "description": "mailing info",
+                        "name": "template",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.QueueEntry"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Not valid mailing info",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "DB error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/mailing/{mailing_id}": {
+            "get": {
+                "summary": "Get mailing by id.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "mailing id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Not found mailing with id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "DB error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.QueueEntry": {
+            "type": "object",
+            "properties": {
+                "attempts": {
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "fill from db driver",
+                    "type": "string"
+                },
+                "receivers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Receiver"
+                    }
+                },
+                "status": {
+                    "description": "Status:\n* 0 - Pending.\n* 1 - Done.\n* 2 - Error.",
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1,
+                        2
+                    ]
+                },
+                "subject": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Receiver": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "type": "string"
+                },
+                "isSended": {
+                    "type": "boolean"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,112 @@
+basePath: /
+definitions:
+  model.QueueEntry:
+    properties:
+      attempts:
+        type: integer
+      id:
+        description: fill from db driver
+        type: string
+      receivers:
+        items:
+          $ref: '#/definitions/model.Receiver'
+        type: array
+      status:
+        description: |-
+          Status:
+          * 0 - Pending.
+          * 1 - Done.
+          * 2 - Error.
+        enum:
+        - 0
+        - 1
+        - 2
+        type: integer
+      subject:
+        type: string
+      text:
+        type: string
+    type: object
+  model.Receiver:
+    properties:
+      addr:
+        type: string
+      isSended:
+        type: boolean
+    type: object
+host: petstore.swagger.io
+info:
+  contact: {}
+  description: Service send mail to receivers.
+  termsOfService: http://swagger.io/terms/
+  title: Mailsender
+  version: "0.1"
+paths:
+  /mailing:
+    get:
+      parameters:
+      - description: page number, start from 1
+        in: query
+        name: p
+        type: integer
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: page error
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Get mailing list.
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: mailing info
+        in: body
+        name: template
+        required: true
+        schema:
+          $ref: '#/definitions/model.QueueEntry'
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Not valid mailing info
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Add mailing in queue.
+  /mailing/{mailing_id}:
+    get:
+      parameters:
+      - description: mailing id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: Not found mailing with id
+          schema:
+            type: string
+        "500":
+          description: DB error
+          schema:
+            type: string
+      summary: Get mailing by id.
+swagger: "2.0"

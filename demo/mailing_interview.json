@@ -1,0 +1,12 @@
+{
+    "receivers": [
+        {
+            "addr": "test@test.net"
+        },
+        {
+            "addr":  "test@test.net"
+        }
+    ],
+    "subject":"Interview",
+    "text": "<b>Popov V</b> interview!"
+}
