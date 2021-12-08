@@ -3,26 +3,27 @@ definitions:
   mailsender.Info:
     properties:
       id:
+        description: mailing id
         type: string
       status:
+        description: mailing status
         type: string
     type: object
-  mailsender.ListJson:
+  mailsender.MailingList:
     properties:
       data:
         items:
           $ref: '#/definitions/mailsender.Info'
         type: array
       total:
+        description: total pages
         type: integer
     type: object
-  model.QueueEntry:
+  model.Mailing:
     properties:
       attempts:
+        description: attempts send
         type: integer
-      id:
-        description: fill from db driver
-        type: string
       receivers:
         items:
           $ref: '#/definitions/model.Receiver'
@@ -69,7 +70,7 @@ paths:
         "200":
           description: Mailings list
           schema:
-            $ref: '#/definitions/mailsender.ListJson'
+            $ref: '#/definitions/mailsender.MailingList'
         "400":
           description: page error
           schema:
@@ -88,7 +89,7 @@ paths:
         name: template
         required: true
         schema:
-          $ref: '#/definitions/model.QueueEntry'
+          $ref: '#/definitions/model.Mailing'
       responses:
         "200":
           description: id
@@ -115,7 +116,7 @@ paths:
         "200":
           description: mailing
           schema:
-            $ref: '#/definitions/model.QueueEntry'
+            $ref: '#/definitions/model.Mailing'
         "400":
           description: Not found mailing with id
           schema:

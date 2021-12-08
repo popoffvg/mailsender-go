@@ -27,10 +27,10 @@ func (err *ErrNotFound) Error() string {
 }
 
 type MailingQueue interface {
-	Find(ctx context.Context, id model.EntryId) (m model.QueueEntry, err error)
-	FindAll(ctx context.Context, skip int64, pageSize int64) (m []model.QueueEntry, err error)
-	Get(context.Context) (model.QueueEntry, bool, error)           // get last mailing for send
-	Save(context.Context, model.QueueEntry) (model.EntryId, error) // add mailing to queue
+	Find(ctx context.Context, id model.EntryId) (m model.Mailing, err error)
+	FindAll(ctx context.Context, skip int64, pageSize int64) (m []model.Mailing, err error)
+	Get(context.Context) (model.Mailing, bool, error)           // get last mailing for send
+	Save(context.Context, model.Mailing) (model.EntryId, error) // add mailing to queue
 	Count(ctx context.Context) (int64, error)
 }
 
@@ -60,7 +60,7 @@ func NewMongoQueue(
 	}, nil
 }
 
-func (r *mailingQueueMongo) Find(ctx context.Context, id model.EntryId) (m model.QueueEntry, err error) {
+func (r *mailingQueueMongo) Find(ctx context.Context, id model.EntryId) (m model.Mailing, err error) {
 	oid, err := primitive.ObjectIDFromHex(string(id))
 	if err != nil {
 		return m, fmt.Errorf("failed to convert hex to objectid. hex: %s", id)
@@ -72,33 +72,33 @@ func (r *mailingQueueMongo) Find(ctx context.Context, id model.EntryId) (m model
 		if errors.Is(result.Err(), mongo.ErrNoDocuments) {
 			return m, &ErrNotFound{id}
 		}
-		return m, fmt.Errorf("failed to find one user by id: %s due to error: %v", id, err)
+		return m, fmt.Errorf("failed to find one user by id: %s due to error: %w", id, err)
 	}
 	if err = result.Decode(&m); err != nil {
-		return m, fmt.Errorf("failed to decode user (id:%s) from DB due to error: %v", id, err)
+		return m, fmt.Errorf("failed to decode user (id:%s) from DB due to error: %w", id, err)
 	}
 
 	return m, nil
 }
 
-func (r *mailingQueueMongo) FindAll(ctx context.Context, skip int64, pageSize int64) (m []model.QueueEntry, err error) {
+func (r *mailingQueueMongo) FindAll(ctx context.Context, skip int64, pageSize int64) (m []model.Mailing, err error) {
 	findOptions := options.Find()
 	findOptions.SetSkip(skip)
 	findOptions.SetLimit(pageSize)
 	findOptions.SetSort(bson.D{{"timestamp", -1}})
 	cursor, err := r.collection.Find(ctx, bson.D{}, findOptions)
 	if cursor.Err() != nil {
-		return m, fmt.Errorf("failed to find all users due to error: %v", err)
+		return m, fmt.Errorf("failed to find all users due to error: %w", err)
 	}
 
 	if err = cursor.All(ctx, &m); err != nil {
-		return m, fmt.Errorf("failed to read all documents from cursor. error: %v", err)
+		return m, fmt.Errorf("failed to read all documents from cursor. error: %w", err)
 	}
 
 	return m, nil
 }
 
-func (q *mailingQueueMongo) Get(ctx context.Context) (model.QueueEntry, bool, error) {
+func (q *mailingQueueMongo) Get(ctx context.Context) (model.Mailing, bool, error) {
 	options := options.FindOne()
 	options.SetSort(bson.D{{"timestamp", 1}})
 	filter := bson.M{
@@ -108,27 +108,26 @@ func (q *mailingQueueMongo) Get(ctx context.Context) (model.QueueEntry, bool, er
 
 	if result.Err() != nil {
 		if errors.Is(result.Err(), mongo.ErrNoDocuments) {
-			return model.QueueEntry{}, false, nil
+			return model.Mailing{}, false, nil
 		}
 
-		return model.QueueEntry{}, false, result.Err()
+		return model.Mailing{}, false, result.Err()
 	}
 
-	var entry model.QueueEntry
+	var entry model.Mailing
 	if err := result.Decode(&entry); err != nil {
-		return model.QueueEntry{}, false, err
+		return model.Mailing{}, false, err
 	}
 
 	return entry, true, nil
 }
 
-func (q *mailingQueueMongo) Save(ctx context.Context, entry model.QueueEntry) (model.EntryId, error) {
+func (q *mailingQueueMongo) Save(ctx context.Context, entry model.Mailing) (model.EntryId, error) {
 	var result *mongo.InsertOneResult
 	var err error
 	var id model.EntryId
 	entry.Timestamp = time.Now()
 
-	
 	if entry.IsNew() {
 		// create
 		result, err = q.create(ctx, &entry)
@@ -158,7 +157,7 @@ func (r *mailingQueueMongo) Count(ctx context.Context) (int64, error) {
 	return r.collection.CountDocuments(ctx, bson.D{}, nil)
 }
 
-func (r *mailingQueueMongo) update(ctx context.Context,queue *model.QueueEntry) error {
+func (r *mailingQueueMongo) update(ctx context.Context, queue *model.Mailing) error {
 	objectID, err := primitive.ObjectIDFromHex(string(queue.Id))
 	if err != nil {
 		return fmt.Errorf("failed to convert user ID to ObjectID. ID=%v", queue.Id)
@@ -181,7 +180,7 @@ func (r *mailingQueueMongo) update(ctx context.Context,queue *model.QueueEntry) 
 
 	result, err := r.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return fmt.Errorf("failed to execute update user query. error: %v", err)
+		return fmt.Errorf("failed to execute update user query. error: %w", err)
 	}
 
 	if result.MatchedCount == 0 {
@@ -191,7 +190,7 @@ func (r *mailingQueueMongo) update(ctx context.Context,queue *model.QueueEntry) 
 	return nil
 }
 
-func (r *mailingQueueMongo) create(ctx context.Context, queue *model.QueueEntry) (*mongo.InsertOneResult, error) {
+func (r *mailingQueueMongo) create(ctx context.Context, queue *model.Mailing) (*mongo.InsertOneResult, error) {
 	result, err := r.collection.InsertOne(ctx, queue)
 	if err != nil {
 		return nil, err

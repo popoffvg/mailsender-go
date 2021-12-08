@@ -95,13 +95,13 @@ func (s *Server) configureRouters() {
 //MailingCreate godoc
 //@Summary Add mailing in queue.
 //@Accept json
-//@Param template body model.QueueEntry true "mailing info"
+//@Param template body model.Mailing true "mailing info"
 //@Success 200 {string} string "id"
 //@Success 400 {string} string "Not valid mailing info"
 //@Success 500 {string} string "DB error"
 //@Router /mailing [post]
 func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
-	var mailing model.QueueEntry
+	var mailing model.Mailing
 
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -130,19 +130,19 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 type Info struct {
-	Id     string `json:"id"`
-	Status string `json:"status"`
+	Id     string `json:"id"`     // mailing id
+	Status string `json:"status"` // mailing status
 }
 
-type ListJson struct {
-	Total int64  `json:"total"`
+type MailingList struct {
+	Total int64  `json:"total"` // total pages
 	Data  []Info `json:"data"`
 }
 
 //MailingList godoc
 //@Summary Get mailing list.
 //@Param p query int false "page number, start from 1"
-//@Success 200 {object} mailsender.ListJson "Mailings list"
+//@Success 200 {object} mailsender.MailingList "Mailings list"
 //@Success 400 {string} string "page error"
 //@Success 500 {string} string "DB error"
 //@Router /mailing [get]
@@ -167,7 +167,7 @@ func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 
 	count, _ := s.queue.Count(r.Context())
 
-	responseData := &ListJson{
+	responseData := &MailingList{
 		Data:  make([]Info, len(lists)),
 		Total: 1 + count/pageSize,
 	}
@@ -187,7 +187,7 @@ func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 //MailingGet godoc
 //@Summary Get mailing by id.
 //@Param id path string true "mailing id"
-//@Success 200 {object} model.QueueEntry  "mailing"
+//@Success 200 {object} model.Mailing  "mailing"
 //@Success 400 {string} string "Not found mailing with id"
 //@Success 500 {string} string "DB error"
 //@Router /mailing/{mailing_id} [get]
@@ -220,7 +220,7 @@ func (s *Server) Get(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
-func mailingListView(list model.QueueEntry) Info {
+func mailingListView(list model.Mailing) Info {
 	return Info{
 		Id:     string(list.Id),
 		Status: list.StatusToString(),

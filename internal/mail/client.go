@@ -12,7 +12,7 @@ import (
 )
 
 type Client interface {
-	Send(entry *model.QueueEntry) error
+	Send(entry *model.Mailing) error
 }
 
 func New(cfg *MailConfig, logger *zap.SugaredLogger) Client {
@@ -57,7 +57,7 @@ type internalClient struct {
 	cfg    *MailConfig
 }
 
-func (c *internalClient) Send(mailing *model.QueueEntry) error {
+func (c *internalClient) Send(mailing *model.Mailing) error {
 	var sendingErr ErrSending
 	smtp := gomail.NewDialer(c.cfg.Host, c.cfg.Port, c.cfg.Login, c.cfg.Password)
 	smtp.TLSConfig = &tls.Config{InsecureSkipVerify: true}

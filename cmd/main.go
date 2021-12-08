@@ -18,7 +18,6 @@ const (
 
 var (
 	logger *zap.SugaredLogger
-	cfg    *config.Config
 )
 
 //@title Mailsender

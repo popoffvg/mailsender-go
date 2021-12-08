@@ -23,19 +23,19 @@ const (
 	AttemptsCount = 3
 )
 
-type QueueEntry struct {
-	Id        EntryId       `bson:"_id,omitempty" json:"id" swaggerignore:"true` // fill from db driver
+type Mailing struct {
+	Id        EntryId       `bson:"_id,omitempty" json:"-" swaggerignore:"true"` // if empty than mailing will be created
 	Receivers []Receiver    `bson:"receivers" json:"receivers"` 
 	Subject   string        `bson:"subject" json:"subject"`
 	Text      string        `bson:"text" json:"text"`
-	Timestamp time.Time     `bson:"timestamp" swaggerignore:"true"`
+	Timestamp time.Time     `bson:"timestamp" swaggerignore:"true"` // define queue priority
 
 	// Status:
 	// * 0 - Pending.
 	// * 1 - Done.
 	// * 2 - Error.
-	Status    MailingStatus `bson:"status" enums:"0,1,2"`
-	Attempts  int           
+	Status    MailingStatus `bson:"status" json:"-" enums:"0,1,2"`
+	Attempts  int           `bson:"attempts" json:"attempts"` // attempts send
 }
 
 type Receiver struct {
@@ -57,7 +57,7 @@ func (id EntryId) MarshalBSONValue() (bsontype.Type, []byte, error) {
 	return bson.MarshalValue(p)
 }
 
-func (entry *QueueEntry) StatusToString() string {
+func (entry *Mailing) StatusToString() string {
 	switch {
 	case entry.Status == StatusMailingDone:
 		return "Done"
@@ -73,6 +73,6 @@ func (entry *QueueEntry) StatusToString() string {
 	}
 }
 
-func (m *QueueEntry) IsNew() bool {
+func (m *Mailing) IsNew() bool {
 	return m.Id == ""
 }
