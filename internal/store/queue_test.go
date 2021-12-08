@@ -33,7 +33,7 @@ func Test_SaveFind(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	etalon := model.QueueEntry{
+	etalon := model.Mailing{
 		Subject: "test",
 	}
 	id, err := queue.Save(context.Background(), etalon)
@@ -79,19 +79,19 @@ func Test_FindAll(t *testing.T) {
 	// get few pages
 	pauseTime := time.Second * 1
 	for i := 0; i < 20; i++ {
-		_ = save(t, queue, model.QueueEntry{
+		_ = save(t, queue, model.Mailing{
 			Subject: "empty",
 			Status:  model.StatusMailingPending,
 		})
 	}
 	// sleep for separate empty data and not
 	time.Sleep(pauseTime)
-	id1 := save(t, queue, model.QueueEntry{
+	id1 := save(t, queue, model.Mailing{
 		Subject: "test",
 		Status:  model.StatusMailingDone,
 	})
 	time.Sleep(pauseTime)
-	id2 := save(t, queue, model.QueueEntry{
+	id2 := save(t, queue, model.Mailing{
 		Subject: "test2",
 		Status:  model.StatusMailingPending,
 	})
@@ -140,12 +140,12 @@ func Test_SaveGet(t *testing.T) {
 	pauseTime := time.Second * 1
 	// sleep for separate empty data and not
 	time.Sleep(pauseTime)
-	id1 := save(t, queue, model.QueueEntry{
+	id1 := save(t, queue, model.Mailing{
 		Subject: "test",
 		Status:  model.StatusMailingPending,
 	})
 	time.Sleep(pauseTime)
-	save(t, queue, model.QueueEntry{
+	save(t, queue, model.Mailing{
 		Subject: "test2",
 		Status:  model.StatusMailingPending,
 	})
@@ -158,7 +158,7 @@ func Test_SaveGet(t *testing.T) {
 	assert.Equal(t, id1, entry.Id)
 }
 
-func save(t *testing.T, queue MailingQueue, entry model.QueueEntry) model.EntryId {
+func save(t *testing.T, queue MailingQueue, entry model.Mailing) model.EntryId {
 	id1, err := queue.Save(context.Background(), entry)
 	if err != nil {
 		t.Fatal(err)

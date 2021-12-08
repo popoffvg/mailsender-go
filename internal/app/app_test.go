@@ -1,6 +1,3 @@
-//go:build integration
-// +build integration
-
 package app
 
 import (
@@ -80,7 +77,7 @@ func Test_Create(t *testing.T) {
 	wg.Wait()
 	defer app.Stop(context.Background())
 
-	mailing := model.QueueEntry{}
+	mailing := model.Mailing{}
 	b, err := json.Marshal(mailing)
 	if err != nil {
 		t.Fatal(err)
@@ -145,7 +142,7 @@ func Test_List(t *testing.T) {
 	wg.Wait()
 	defer app.Stop(context.Background())
 
-	mailing := model.QueueEntry{}
+	mailing := model.Mailing{}
 	b, err := json.Marshal(mailing)
 	if err != nil {
 		t.Fatal(err)
@@ -163,7 +160,7 @@ func Test_List(t *testing.T) {
 
 	data = send(t, http.MethodGet, "mailing", make([]byte, 0))
 
-	list := mailsender.ListJson{
+	list := mailsender.MailingList{
 		Total: 1,
 		Data: []mailsender.Info{
 			{
@@ -177,7 +174,7 @@ func Test_List(t *testing.T) {
 		},
 	}
 
-	var sRes mailsender.ListJson
+	var sRes mailsender.MailingList
 	json.Unmarshal(data, &sRes)
 	assert.Equal(t, list, sRes)
 }
@@ -227,17 +224,11 @@ func Test_Get(t *testing.T) {
 		mailSender: sender,
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		app.Start(context.Background())
-		time.Sleep(time.Second) // wait start sender
-		wg.Done()
-	}()
-	wg.Wait()
+	app.Start(context.Background())
+	time.Sleep(time.Second) // wait start sender
 	defer app.Stop(context.Background())
 
-	mailing := model.QueueEntry{}
+	mailing := model.Mailing{}
 	b, err := json.Marshal(mailing)
 	if err != nil {
 		t.Fatal(err)
@@ -249,12 +240,12 @@ func Test_Get(t *testing.T) {
 
 	data = send(t, http.MethodGet, "mailing/"+id, make([]byte, 0))
 
-	mailing.Id = model.EntryId(id)
+	mailing.Id = model.EntryId("") // not return to client
 	mailing.Timestamp = time.Now()
-	mailing.Status = model.StatusMailingDone
-	var mailingFromServer model.QueueEntry
+	mailing.Status = model.StatusMailingPending // default status
+	var mailingFromServer model.Mailing
 	json.Unmarshal(data, &mailingFromServer)
-	mailingFromServer.Timestamp = mailing.Timestamp
+	mailingFromServer.Timestamp = mailing.Timestamp // set because not return from db after write
 
 	assert.Equal(t, mailing, mailingFromServer)
 }
@@ -294,6 +285,8 @@ func send(t *testing.T, method string, path string, body []byte) []byte {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer res.Body.Close()
+
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		t.Fatal(err)
@@ -303,6 +296,6 @@ func send(t *testing.T, method string, path string, body []byte) []byte {
 
 type testSender struct{}
 
-func (s *testSender) Send(entry *model.QueueEntry) error {
+func (s *testSender) Send(entry *model.Mailing) error {
 	return nil
 }

@@ -114,7 +114,7 @@ func (s *Sender) send() (result bool) {
 	result = true
 
 	err = s.pushMail(entry)
-	for i, _ := range entry.Receivers {
+	for i := range entry.Receivers {
 		entry.Receivers[i].IsSended = true
 	}
 	if err != nil {
@@ -136,7 +136,7 @@ func (s *Sender) send() (result bool) {
 	return
 }
 
-func (s *Sender) error(entry model.QueueEntry, err error) {
+func (s *Sender) error(entry model.Mailing, err error) {
 	s.logger.Error(err)
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	entry.Attempts++
@@ -152,6 +152,6 @@ func (s *Sender) error(entry model.QueueEntry, err error) {
 	}
 }
 
-func (s *Sender) pushMail(entry model.QueueEntry) error {
+func (s *Sender) pushMail(entry model.Mailing) error {
 	return s.mail.Send(&entry)
 }

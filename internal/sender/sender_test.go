@@ -5,7 +5,6 @@ package sender
 
 import (
 	"context"
-	"sync"
 	"testing"
 	"time"
 
@@ -32,25 +31,24 @@ func Test_NonBlockingWhileServe(t *testing.T) {
 }
 
 type queueMock struct {
-	wg     sync.WaitGroup
 	logger *zap.SugaredLogger
 }
 
 // call from serve
-func (q *queueMock) Get(context.Context) (model.QueueEntry, bool, error) {
+func (q *queueMock) Get(context.Context) (model.Mailing, bool, error) {
 	q.logger.Info("Start wait...")
-	return model.QueueEntry{}, false, nil
+	return model.Mailing{}, false, nil
 }
 
-func (q *queueMock) Save(context.Context, model.QueueEntry) (model.EntryId, error) {
+func (q *queueMock) Save(context.Context, model.Mailing) (model.EntryId, error) {
 	return model.EmptyEntryId, nil
 }
 
-func (q *queueMock) Find(ctx context.Context, id model.EntryId) (m model.QueueEntry, err error) {
-	return model.QueueEntry{}, nil
+func (q *queueMock) Find(ctx context.Context, id model.EntryId) (m model.Mailing, err error) {
+	return model.Mailing{}, nil
 }
 
-func (q *queueMock) FindAll(ctx context.Context, skip int64, pageSize int64) (m []model.QueueEntry, err error) {
+func (q *queueMock) FindAll(ctx context.Context, skip int64, pageSize int64) (m []model.Mailing, err error) {
 	return nil, nil
 }
 

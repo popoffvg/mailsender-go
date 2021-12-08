@@ -39,7 +39,7 @@ var doc = `{
                     "200": {
                         "description": "Mailings list",
                         "schema": {
-                            "$ref": "#/definitions/mailsender.ListJson"
+                            "$ref": "#/definitions/mailsender.MailingList"
                         }
                     },
                     "400": {
@@ -68,7 +68,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.QueueEntry"
+                            "$ref": "#/definitions/model.Mailing"
                         }
                     }
                 ],
@@ -110,7 +110,7 @@ var doc = `{
                     "200": {
                         "description": "mailing",
                         "schema": {
-                            "$ref": "#/definitions/model.QueueEntry"
+                            "$ref": "#/definitions/model.Mailing"
                         }
                     },
                     "400": {
@@ -134,14 +134,16 @@ var doc = `{
             "type": "object",
             "properties": {
                 "id": {
+                    "description": "mailing id",
                     "type": "string"
                 },
                 "status": {
+                    "description": "mailing status",
                     "type": "string"
                 }
             }
         },
-        "mailsender.ListJson": {
+        "mailsender.MailingList": {
             "type": "object",
             "properties": {
                 "data": {
@@ -151,19 +153,17 @@ var doc = `{
                     }
                 },
                 "total": {
+                    "description": "total pages",
                     "type": "integer"
                 }
             }
         },
-        "model.QueueEntry": {
+        "model.Mailing": {
             "type": "object",
             "properties": {
                 "attempts": {
+                    "description": "attempts send",
                     "type": "integer"
-                },
-                "id": {
-                    "description": "fill from db driver",
-                    "type": "string"
                 },
                 "receivers": {
                     "type": "array",

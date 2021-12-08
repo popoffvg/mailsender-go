@@ -20,7 +20,7 @@ func Test_Mailing(t *testing.T) {
 		Email:    "mts.cloud.interview@gmail.com",
 	}
 	client := New(cfg, logger)
-	err := client.Send(&model.QueueEntry{
+	err := client.Send(&model.Mailing{
 		Subject: "Test",
 		Receivers: []model.Receiver{
 			{Addr: "popoffvg@gmail.com"},
